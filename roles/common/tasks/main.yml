@@ -1,15 +1,14 @@
+- name: create ansible log directory
+  file:
+    path: /var/log/ansible
+    state: directory
+    mode: 0666
+  become: true
+
 #pacman -Syu
 - name: upgrade system
   pacman:
     update_cache: yes
     upgrade: yes
   become: true
-
-# install docker
-- name: install docker
-  pacman:
-    name: docker
-    state: present
-  become: true
-
-- import_tasks: minishift.yml
+  when: ansible_os_family == 'Archlinux'

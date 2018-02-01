@@ -1,0 +1,106 @@
+# install docker
+- name: install docker
+  package:
+    name: docker
+    state: present
+  become: true
+
+- name: install KVM
+  get_url:
+     url: https://github.com/dhiltgen/docker-machine-kvm/releases/download/v0.7.0/docker-machine-driver-kvm
+     dest: /usr/local/bin/docker-machine-driver-kvm
+     mode: 0710
+     group: users
+  become: true
+
+- name: install dmidecode
+  package:
+    name: dmidecode
+    state: present
+  become: true
+
+- name: install libvirt
+  package:
+    name: libvirt
+    state: present
+  become: true
+
+- name: install qemu
+  package:
+    name: qemu
+    state: present
+  become: true
+
+- name: install dnsmasq
+  package:
+    name: dnsmasq
+    state: present
+  become: true
+
+- name: install ebtables
+  package:
+    name: ebtables
+    state: present
+  become: true
+
+- name: add user to kvm group
+  user: 
+    name: "{{ ansible_user }}"
+    append: yes
+    groups: kvm,libvirt
+  become: true
+
+- name: Update libvirt configuration in /etc/libvirt/qemu.conf
+  lineinfile:
+    path: /etc/libvirt/qemu.conf
+    regexp: '^group=".+"'
+    line: 'group="kvm"' 
+  become: true
+
+#https://wiki.libvirt.org/page/Networking#Host_configuration
+- name: configure virsh nat forwarding (define-default)
+  become: true
+  shell: virsh net-define /etc/libvirt/qemu/networks/default.xml > /var/log/ansible/virsh-define-default.log
+  creates: /var/log/ansible/virsh-define-default.log
+
+- name: configure virsh nat forwarding (autostart-default)
+  become: true
+  shell: virsh net-autostart default > /var/log/ansible/virsh-autostart-default.log
+  creates: /var/log/ansible/virsh-autostart-default.log
+
+- name: configure virsh nat forwarding (start-default)
+  become: true
+  shell: virsh net-start default > /var/log/ansible/virsh-start-default.log
+  creates: /var/log/ansible/virsh-start-default.log
+
+- name: download minishift tar
+  become: true
+  get_url:
+    url: '{{minishift_url}}'
+    dest: '/tmp/{{minishift_tgz}}'
+    checksum: '{{minishift_checksum}}'
+    mode: 0755
+
+- name: make minishift install dir
+  become: true
+  file:
+    path: '{{minishift_install_dir}}'
+    state: directory
+    mode: 0755
+
+- name: unarchive
+  become: true
+  unarchive:
+    copy: no
+    src: /tmp/{{minishift_tgz}}
+    dest: '{{minishift_install_dir}}'
+    creates: '{{minishift_install_dir}}/minishift'
+
+- name: link
+  become: true
+  file:
+    src: '{{minishift_install_dir}}/minishift'
+    dest: '{{minishift_bin_dir}}/minishift'
+    state: link
+
+##TODO: disable dnsmasq in /etc/NetworkManager/NetworkManager.conf

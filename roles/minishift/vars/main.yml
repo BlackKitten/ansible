@@ -1,0 +1,15 @@
+---
+# defaults file for minishift
+minishift_version: 1.12.0
+minishift_platform: linux-amd64
+# SHAs available from https://github.com/minishift/minishift/releases/tag/v0.22.0
+minishift_checksums:
+  linux-amd64: sha256:c9fce2a50b98f7d46bca84e5f95e1da9ea7fd6e703ce9c6fa697e9855945ab1f
+minishift_mirror: https://github.com/minishift/minishift/releases/download
+minishift_bin_dir: /usr/local/bin
+minishift_exe: minishift-{{minishift_version}}-{{minishift_platform}}
+minishift_tgz: '{{minishift_exe}}.tgz'
+minishift_url: '{{minishift_mirror}}/v{{minishift_version}}/{{minishift_tgz}}'
+minishift_install_dir: '/opt/tools/{{minishift_exe}}'
+minishift_checksum: '{{minishift_checksums[minishift_platform]}}'
+minishift_install_target: '{{minishift_install_dir}}/{{minishift_exe}}-{{minishift_version}}'
