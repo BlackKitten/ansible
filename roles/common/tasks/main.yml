@@ -2,7 +2,7 @@
   file:
     path: /var/log/ansible
     state: directory
-    mode: 0666
+    mode: 0777
   become: true
 
 #pacman -Syu
@@ -12,3 +12,27 @@
     upgrade: yes
   become: true
   when: ansible_os_family == 'Archlinux'
+
+- name: install zsh
+  package:
+    name: zsh
+    state: present
+  become: true
+
+- name: install curl
+  package:
+    name: curl
+    state: present
+  become: true
+
+- name: create oh-my-zsh log file
+  file: 
+    path: /var/log/ansible/ohmyzsh.log
+    state: touch
+    owner: "{{ ansible_user }}"
+  become: true
+    
+- name: install oh-my-zsh
+  shell: sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" >> /var/log/ansible/ohmyzsh.log
+  args:
+    creates: /var/log/ansible/ohmyzsh.log

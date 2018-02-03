@@ -13,37 +13,31 @@
      group: users
   become: true
 
-- name: install dmidecode
+- name: install dmidecode, libvirt, qemu, dnsmasq & ebtables
   package:
-    name: dmidecode
+    name: "{{ item }}"
     state: present
   become: true
+  with_items:
+    - dmidecode
+    - libvirt
+    - qemu
+    - dnsmasq
+    - ebtables
+  when: ansible_os_family == 'Archlinux'
 
-- name: install libvirt
+- name: install libvirt-bin, qemu-kvm
   package:
-    name: libvirt
+    name: "{{ item }}"
     state: present
   become: true
+  with_items:
+    - libvirt-bin
+    - qemu-kvm
+  when: ansible_os_family == 'Debian'
 
-- name: install qemu
-  package:
-    name: qemu
-    state: present
-  become: true
 
-- name: install dnsmasq
-  package:
-    name: dnsmasq
-    state: present
-  become: true
-
-- name: install ebtables
-  package:
-    name: ebtables
-    state: present
-  become: true
-
-- name: add user to kvm group
+- name: add user to kvm, libvirt group
   user: 
     name: "{{ ansible_user }}"
     append: yes
